@@ -188,17 +188,30 @@ func (r *mutationResolver) DeleteActor(ctx context.Context, id string) (bool, er
 
 // CreateGenre is the resolver for the createGenre field.
 func (r *mutationResolver) CreateGenre(ctx context.Context, input model.NewGenre) (*model.Genre, error) {
-	panic(fmt.Errorf("not implemented: CreateGenre - createGenre"))
+	genre := models.Genres{Genres: input.Name}
+	if err := config.DB.Create(&genre).Error; err != nil {
+		return nil, err
+	}
+	return &model.Genre{ID: fmt.Sprint(genre.ID), Name: genre.Genres}, nil
 }
 
 // UpdateGenre is the resolver for the updateGenre field.
 func (r *mutationResolver) UpdateGenre(ctx context.Context, id string, input model.NewGenre) (*model.Genre, error) {
-	panic(fmt.Errorf("not implemented: UpdateGenre - updateGenre"))
+	var genre models.Genres
+	if err := config.DB.First(&genre, id).Error; err != nil {
+		return nil, err
+	}
+	genre.Genres = input.Name
+	config.DB.Save(&genre)
+	return &model.Genre{ID: fmt.Sprint(genre.ID), Name: genre.Genres}, nil
 }
 
 // DeleteGenre is the resolver for the deleteGenre field.
 func (r *mutationResolver) DeleteGenre(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteGenre - deleteGenre"))
+	if err := config.DB.Delete(&models.Genres{}, id).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // CreateMovie is the resolver for the createMovie field.
@@ -256,7 +269,7 @@ func (r *queryResolver) Actors(ctx context.Context) ([]*model.Actor, error) {
 	for _, a := range actors {
 		result = append(result, &model.Actor{ID: fmt.Sprint(a.ID), Name: a.Name, Photo: a.Photo})
 	}
-	return result, nil
+	return result, nil
 }
 
 // Actor is the resolver for the actor field.
@@ -270,12 +283,24 @@ func (r *queryResolver) Actor(ctx context.Context, id string) (*model.Actor, err
 
 // Genres is the resolver for the genres field. menampung data genre
 func (r *queryResolver) Genres(ctx context.Context) ([]*model.Genre, error) {
-	panic(fmt.Errorf("not implemented: Genres - genres"))
+	var genres []models.Genres
+	if err := config.DB.Find(&genres).Error; err != nil {
+		return nil, err
+	}
+	var result []*model.Genre
+	for _, g := range genres {
+		result = append(result, &model.Genre{ID: fmt.Sprint(g.ID), Name: g.Genres})
+	}
+	return result, nil
 }
 
 // Genre is the resolver for the genre field. memanggil data
 func (r *queryResolver) Genre(ctx context.Context, id string) (*model.Genre, error) {
-	panic(fmt.Errorf("not implemented: Genre - genre"))
+	var genre models.Genres
+	if err := config.DB.First(&genre, id).Error; err != nil {
+		return nil, err
+	}
+	return &model.Genre{ID: fmt.Sprint(genre.ID), Name: genre.Genres}, nil
 }
 
 // Broadcasts is the resolver for the broadcasts field.
