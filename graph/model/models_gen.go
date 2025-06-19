@@ -2,25 +2,109 @@
 
 package model
 
+type Actor struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Photo string `json:"photo"`
+}
+
+type AuthResponse struct {
+	Token string `json:"token"`
+	User  *User  `json:"user"`
+}
+
+type Broadcast struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Link string `json:"link"`
+}
+
+type CreateMovieInput struct {
+	Title        string   `json:"title"`
+	Description  string   `json:"description"`
+	Poster       *string  `json:"poster,omitempty"`
+	Rating       *float64 `json:"rating,omitempty"`
+	Duration     *int32   `json:"duration,omitempty"`
+	Views        *int32   `json:"views,omitempty"`
+	BroadcastIDs []string `json:"broadcastIDs"`
+	ActorIDs     []string `json:"actorIDs"`
+	GenreIDs     []string `json:"genreIDs"`
+	StatusIDs    []string `json:"statusIDs"`
+}
+
+type Genre struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type Movie struct {
+	ID         string       `json:"id"`
+	Title      string       `json:"title"`
+	Poster     string       `json:"poster"`
+	Rating     *float64     `json:"rating,omitempty"`
+	Duration   *int32       `json:"duration,omitempty"`
+	Synopsis   *string      `json:"synopsis,omitempty"`
+	Views      *int32       `json:"views,omitempty"`
+	Broadcasts []*Broadcast `json:"broadcasts,omitempty"`
+	Genres     []*Genre     `json:"genres"`
+	Actors     []*Actor     `json:"actors"`
+	Statuses   []*Status    `json:"statuses"`
+}
+
 type Mutation struct {
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type NewActor struct {
+	Name  string  `json:"name"`
+	Photo *string `json:"photo,omitempty"`
+}
+
+type NewBroadcast struct {
+	Name string `json:"name"`
+	Link string `json:"link"`
+}
+
+type NewGenre struct {
+	Name string `json:"name"`
 }
 
 type Query struct {
 }
 
-type Todo struct {
+type RegisterInput struct {
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirmPassword"`
+	RoleID          int32  `json:"roleId"`
+}
+
+type Role struct {
 	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+	Name string `json:"name"`
+}
+
+type Status struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type UpdateMovieInput struct {
+	Title        *string  `json:"title,omitempty"`
+	Description  *string  `json:"description,omitempty"`
+	Poster       *string  `json:"poster,omitempty"`
+	Rating       *float64 `json:"rating,omitempty"`
+	Duration     *int32   `json:"duration,omitempty"`
+	Views        *int32   `json:"views,omitempty"`
+	BroadcastIDs []string `json:"broadcastIDs,omitempty"`
+	ActorIDs     []string `json:"actorIDs,omitempty"`
+	GenreIDs     []string `json:"genreIDs,omitempty"`
+	StatusIDs    []string `json:"statusIDs,omitempty"`
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Role  *Role  `json:"role"`
 }

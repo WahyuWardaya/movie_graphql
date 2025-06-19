@@ -10,14 +10,134 @@ import (
 	"movie_api/graph/model"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+// Register is the resolver for the register field.
+func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model.AuthResponse, error) {
+	panic(fmt.Errorf("not implemented: Register - register"))
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+// Login is the resolver for the login field.
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.AuthResponse, error) {
+	panic(fmt.Errorf("not implemented: Login - login"))
+}
+
+// CreateActor is the resolver for the createActor field.
+func (r *mutationResolver) CreateActor(ctx context.Context, input model.NewActor) (*model.Actor, error) {
+	panic(fmt.Errorf("not implemented: CreateActor - createActor"))
+}
+
+// CreateActors is the resolver for the createActors field.
+func (r *mutationResolver) CreateActors(ctx context.Context, inputs []*model.NewActor) ([]*model.Actor, error) {
+	panic(fmt.Errorf("not implemented: CreateActors - createActors"))
+}
+
+// UpdateActor is the resolver for the updateActor field.
+func (r *mutationResolver) UpdateActor(ctx context.Context, id string, input model.NewActor) (*model.Actor, error) {
+	panic(fmt.Errorf("not implemented: UpdateActor - updateActor"))
+}
+
+// DeleteActor is the resolver for the deleteActor field.
+func (r *mutationResolver) DeleteActor(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteActor - deleteActor"))
+}
+
+// CreateGenre is the resolver for the createGenre field.
+func (r *mutationResolver) CreateGenre(ctx context.Context, input model.NewGenre) (*model.Genre, error) {
+	panic(fmt.Errorf("not implemented: CreateGenre - createGenre"))
+}
+
+// UpdateGenre is the resolver for the updateGenre field.
+func (r *mutationResolver) UpdateGenre(ctx context.Context, id string, input model.NewGenre) (*model.Genre, error) {
+	panic(fmt.Errorf("not implemented: UpdateGenre - updateGenre"))
+}
+
+// DeleteGenre is the resolver for the deleteGenre field.
+func (r *mutationResolver) DeleteGenre(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteGenre - deleteGenre"))
+}
+
+// CreateMovie is the resolver for the createMovie field.
+func (r *mutationResolver) CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error) {
+	panic(fmt.Errorf("not implemented: CreateMovie - createMovie"))
+}
+
+// UpdateMovie is the resolver for the updateMovie field.
+func (r *mutationResolver) UpdateMovie(ctx context.Context, id string, input model.UpdateMovieInput) (*model.Movie, error) {
+	panic(fmt.Errorf("not implemented: UpdateMovie - updateMovie"))
+}
+
+// DeleteMovie is the resolver for the deleteMovie field.
+func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteMovie - deleteMovie"))
+}
+
+// CreateBroadcast is the resolver for the createBroadcast field.
+func (r *mutationResolver) CreateBroadcast(ctx context.Context, input model.NewBroadcast) (*model.Broadcast, error) {
+	panic(fmt.Errorf("not implemented: CreateBroadcast - createBroadcast"))
+}
+
+// UpdateBroadcast is the resolver for the updateBroadcast field.
+func (r *mutationResolver) UpdateBroadcast(ctx context.Context, id string, input model.NewBroadcast) (*model.Broadcast, error) {
+	panic(fmt.Errorf("not implemented: UpdateBroadcast - updateBroadcast"))
+}
+
+// DeleteBroadcast is the resolver for the deleteBroadcast field.
+func (r *mutationResolver) DeleteBroadcast(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteBroadcast - deleteBroadcast"))
+}
+
+// Movies is the resolver for the movies field.
+func (r *queryResolver) Movies(ctx context.Context) ([]*model.Movie, error) {
+	panic(fmt.Errorf("not implemented: Movies - movies"))
+}
+
+// Movie is the resolver for the movie field.
+func (r *queryResolver) Movie(ctx context.Context, id string) (*model.Movie, error) {
+	panic(fmt.Errorf("not implemented: Movie - movie"))
+}
+
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: Me - me"))
+}
+
+// Actors is the resolver for the actors field.
+func (r *queryResolver) Actors(ctx context.Context) ([]*model.Actor, error) {
+	panic(fmt.Errorf("not implemented: Actors - actors"))
+}
+
+// Actor is the resolver for the actor field.
+func (r *queryResolver) Actor(ctx context.Context, id string) (*model.Actor, error) {
+	panic(fmt.Errorf("not implemented: Actor - actor"))
+}
+
+// Genres is the resolver for the genres field.
+func (r *queryResolver) Genres(ctx context.Context) ([]*model.Genre, error) {
+	panic(fmt.Errorf("not implemented: Genres - genres"))
+}
+
+// Genre is the resolver for the genre field.
+func (r *queryResolver) Genre(ctx context.Context, id string) (*model.Genre, error) {
+	panic(fmt.Errorf("not implemented: Genre - genre"))
+}
+
+// Broadcasts is the resolver for the broadcasts field.
+func (r *queryResolver) Broadcasts(ctx context.Context) ([]*model.Broadcast, error) {
+	panic(fmt.Errorf("not implemented: Broadcasts - broadcasts"))
+}
+
+// Broadcast is the resolver for the broadcast field.
+func (r *queryResolver) Broadcast(ctx context.Context, id string) (*model.Broadcast, error) {
+	panic(fmt.Errorf("not implemented: Broadcast - broadcast"))
+}
+
+// Statuses is the resolver for the statuses field.
+func (r *queryResolver) Statuses(ctx context.Context) ([]*model.Status, error) {
+	panic(fmt.Errorf("not implemented: Statuses - statuses"))
+}
+
+// Status is the resolver for the status field.
+func (r *queryResolver) Status(ctx context.Context, id string) (*model.Status, error) {
+	panic(fmt.Errorf("not implemented: Status - status"))
 }
 
 // Mutation returns MutationResolver implementation.
@@ -28,3 +148,18 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+}
+func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+	panic(fmt.Errorf("not implemented: Todos - todos"))
+}
+*/

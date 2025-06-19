@@ -2,27 +2,138 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
+type Query {
+  movies: [Movie!]!
+  movie(id: ID!): Movie
+  me: User
+  actors: [Actor!]!
+  actor(id: ID!): Actor
+  genres: [Genre!]!
+  genre(id: ID!): Genre
+  broadcasts: [Broadcast!]!
+  broadcast(id: ID!): Broadcast
+  statuses: [Status!]!
+  status(id: ID!): Status
+}
+
+type Mutation {
+  register(input: RegisterInput!): AuthResponse!
+  login(email: String!, password: String!): AuthResponse!
+  createActor(input: NewActor!): Actor!
+  createActors(inputs: [NewActor!]!): [Actor!]!
+  updateActor(id: ID!, input: NewActor!): Actor!
+  deleteActor(id: ID!): Boolean!
+  createGenre(input: NewGenre!): Genre!
+  updateGenre(id: ID!, input: NewGenre!): Genre!
+  deleteGenre(id: ID!): Boolean!
+  createMovie(input: CreateMovieInput!): Movie!
+  updateMovie(id: ID!, input: UpdateMovieInput!): Movie!
+  deleteMovie(id: ID!): Boolean!
+  createBroadcast(input: NewBroadcast!): Broadcast!
+  updateBroadcast(id: ID!, input: NewBroadcast!): Broadcast!
+  deleteBroadcast(id: ID!): Boolean!
+}
+
+type Movie {
   id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+  title: String!
+  poster: String!
+  rating: Float
+  duration: Int
+  synopsis: String
+  views: Int
+  broadcasts: [Broadcast!]
+  genres: [Genre!]!
+  actors: [Actor!]!
+}
+
+type Broadcast {
+  id: ID!
+  name: String!
+  link: String!
+}
+
+type Status {
+  id: ID!
+  name: String!
+}
+
+extend type Movie {
+  statuses: [Status!]!
+}
+
+type Genre {
+  id: ID!
+  name: String!
+}
+
+type Actor {
+  id: ID!
+  name: String!
+  photo: String!
 }
 
 type User {
   id: ID!
   name: String!
+  email: String!
+  role: Role!
 }
 
-type Query {
-  todos: [Todo!]!
+type Role {
+  id: ID!
+  name: String!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+input RegisterInput {
+  name: String!
+  email: String!
+  password: String!
+  confirmPassword: String!
+  roleId: Int!
 }
 
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
+input NewActor {
+  name: String!
+  photo: String
+}
+
+input NewGenre {
+  name: String!
+}
+
+input NewBroadcast {
+  name: String!
+  link: String!
+}
+
+input CreateMovieInput {
+  title: String!
+  description: String!
+  poster: String
+  rating: Float
+  duration: Int
+  views: Int
+  broadcastIDs: [ID!]!
+  actorIDs: [ID!]!
+  genreIDs: [ID!]!
+  statusIDs: [ID!]!
+}
+
+input UpdateMovieInput {
+  title: String
+  description: String
+  poster: String
+  rating: Float
+  duration: Int
+  views: Int
+  broadcastIDs: [ID!]
+  actorIDs: [ID!]
+  genreIDs: [ID!]
+  statusIDs: [ID!]
+}
+
+type AuthResponse {
+  token: String!
+  user: User!
 }
