@@ -116,22 +116,74 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 
 // CreateActor is the resolver for the createActor field.
 func (r *mutationResolver) CreateActor(ctx context.Context, input model.NewActor) (*model.Actor, error) {
-	panic(fmt.Errorf("not implemented: CreateActor - createActor"))
+	actor := models.Actors{Name: input.Name}
+	if input.Photo != nil {
+		actor.Photo = *input.Photo
+	}
+	if err := config.DB.Create(&actor).Error; err != nil {
+		return nil, err
+	}
+
+	return &model.Actor{
+		ID:    fmt.Sprint(actor.ID),
+		Name:  actor.Name,
+		Photo: actor.Photo, // ✅ kembalikan ke client
+	}, nil
 }
 
 // CreateActors is the resolver for the createActors field.
 func (r *mutationResolver) CreateActors(ctx context.Context, inputs []*model.NewActor) ([]*model.Actor, error) {
-	panic(fmt.Errorf("not implemented: CreateActors - createActors"))
+	var createdActors []*model.Actor
+
+	for _, input := range inputs {
+		actor := models.Actors{Name: input.Name}
+		if input.Photo != nil {
+			actor.Photo = *input.Photo
+		}
+
+		if err := config.DB.Create(&actor).Error; err != nil {
+			return nil, err
+		}
+
+		createdActors = append(createdActors, &model.Actor{
+			ID:    fmt.Sprint(actor.ID),
+			Name:  actor.Name,
+			Photo: actor.Photo,
+		})
+	}
+
+	return createdActors, nil
 }
 
 // UpdateActor is the resolver for the updateActor field.
 func (r *mutationResolver) UpdateActor(ctx context.Context, id string, input model.NewActor) (*model.Actor, error) {
-	panic(fmt.Errorf("not implemented: UpdateActor - updateActor"))
+	var actor models.Actors
+	if err := config.DB.First(&actor, id).Error; err != nil {
+		return nil, err
+	}
+
+	actor.Name = input.Name
+	if input.Photo != nil {
+		actor.Photo = *input.Photo
+	}
+
+	if err := config.DB.Save(&actor).Error; err != nil {
+		return nil, err
+	}
+
+	return &model.Actor{
+		ID:    fmt.Sprint(actor.ID),
+		Name:  actor.Name,
+		Photo: actor.Photo,
+	}, nil
 }
 
 // DeleteActor is the resolver for the deleteActor field.
 func (r *mutationResolver) DeleteActor(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteActor - deleteActor"))
+	if err := config.DB.Delete(&models.Actors{}, id).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // CreateGenre is the resolver for the createGenre field.
@@ -196,12 +248,24 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 
 // Actors is the resolver for the actors field.
 func (r *queryResolver) Actors(ctx context.Context) ([]*model.Actor, error) {
-	panic(fmt.Errorf("not implemented: Actors - actors"))
+	var actors []models.Actors
+	if err := config.DB.Find(&actors).Error; err != nil {
+		return nil, err
+	}
+	var result []*model.Actor
+	for _, a := range actors {
+		result = append(result, &model.Actor{ID: fmt.Sprint(a.ID), Name: a.Name, Photo: a.Photo})
+	}
+	return result, nil
 }
 
 // Actor is the resolver for the actor field.
 func (r *queryResolver) Actor(ctx context.Context, id string) (*model.Actor, error) {
-	panic(fmt.Errorf("not implemented: Actor - actor"))
+	var actor models.Actors
+	if err := config.DB.First(&actor, id).Error; err != nil {
+		return nil, err
+	}
+	return &model.Actor{ID: fmt.Sprint(actor.ID), Name: actor.Name, Photo: actor.Photo}, nil
 }
 
 // Genres is the resolver for the genres field. menampung data genre
