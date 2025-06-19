@@ -6,18 +6,112 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"movie_api/config"
 	"movie_api/graph/model"
+	"movie_api/models"
+	"movie_api/utils"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Register is the resolver for the register field.
 func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model.AuthResponse, error) {
-	panic(fmt.Errorf("not implemented: Register - register"))
+	// Validasi confirm password
+	if input.Password != input.ConfirmPassword {
+		return nil, errors.New("password dan confirm password tidak sama")
+	}
+
+	// Cek apakah email sudah digunakan
+	var existing models.Users
+	if err := config.DB.Where("users_email = ?", input.Email).First(&existing).Error; err == nil {
+		return nil, errors.New("email sudah digunakan")
+	}
+
+	// Hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, errors.New("gagal hash password")
+	}
+
+	// Buat user baru
+	newUser := models.Users{
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: string(hashedPassword),
+		IDRoles:  uint(input.RoleID), // <- tetap gunakan input.RoleId agar fleksibel
+	}
+
+	if err := config.DB.Create(&newUser).Error; err != nil {
+		return nil, errors.New("gagal menyimpan user")
+	}
+
+	// Ambil data role
+	var role models.Roles
+	if err := config.DB.First(&role, newUser.IDRoles).Error; err != nil {
+		return nil, errors.New("gagal mengambil data role")
+	}
+
+	// Generate JWT
+	token, err := utils.GenerateJWT(newUser.ID, newUser.Email, role.Name)
+	if err != nil {
+		return nil, errors.New("gagal membuat token")
+	}
+
+	// Kembalikan response
+	return &model.AuthResponse{
+		Token: token,
+		User: &model.User{
+			ID:    fmt.Sprintf("%d", newUser.ID),
+			Name:  newUser.Name,
+			Email: newUser.Email,
+			Role: &model.Role{
+				ID:   fmt.Sprintf("%d", role.ID),
+				Name: role.Name,
+			},
+		},
+	}, nil
 }
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.AuthResponse, error) {
-	panic(fmt.Errorf("not implemented: Login - login"))
+	var user models.Users
+
+	// Cari user berdasarkan email
+	if err := config.DB.Where("users_email = ?", email).First(&user).Error; err != nil {
+		return nil, errors.New("email tidak ditemukan")
+	}
+
+	// Cek password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return nil, errors.New("password salah")
+	}
+
+	// Ambil role
+	var role models.Roles
+	if err := config.DB.First(&role, user.IDRoles).Error; err != nil {
+		return nil, errors.New("gagal ambil role")
+	}
+
+	// Generate token
+	token, err := utils.GenerateJWT(user.ID, user.Email, role.Name)
+	if err != nil {
+		return nil, errors.New("gagal membuat token")
+	}
+
+	return &model.AuthResponse{
+		Token: token,
+		User: &model.User{
+			ID:    fmt.Sprint(user.ID),
+			Name:  user.Name,
+			Email: user.Email,
+			Role: &model.Role{
+				ID:   fmt.Sprint(role.ID),
+				Name: role.Name,
+			},
+		},
+	}, nil
 }
 
 // CreateActor is the resolver for the createActor field.
