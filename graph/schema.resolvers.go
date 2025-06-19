@@ -204,12 +204,12 @@ func (r *queryResolver) Actor(ctx context.Context, id string) (*model.Actor, err
 	panic(fmt.Errorf("not implemented: Actor - actor"))
 }
 
-// Genres is the resolver for the genres field.
+// Genres is the resolver for the genres field. menampung data genre
 func (r *queryResolver) Genres(ctx context.Context) ([]*model.Genre, error) {
 	panic(fmt.Errorf("not implemented: Genres - genres"))
 }
 
-// Genre is the resolver for the genre field.
+// Genre is the resolver for the genre field. memanggil data
 func (r *queryResolver) Genre(ctx context.Context, id string) (*model.Genre, error) {
 	panic(fmt.Errorf("not implemented: Genre - genre"))
 }
