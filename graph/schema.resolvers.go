@@ -231,17 +231,39 @@ func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, er
 
 // CreateBroadcast is the resolver for the createBroadcast field.
 func (r *mutationResolver) CreateBroadcast(ctx context.Context, input model.NewBroadcast) (*model.Broadcast, error) {
-	panic(fmt.Errorf("not implemented: CreateBroadcast - createBroadcast"))
+	broadcast := models.Broadcast{
+		Name: input.Name,
+		Link: input.Link,
+	}
+	if err := config.DB.Create(&broadcast).Error; err != nil {
+		return nil, err
+	}
+	return &model.Broadcast{
+		ID:   fmt.Sprint(broadcast.ID),
+		Name: broadcast.Name,
+		Link: broadcast.Link,
+	}, nil
 }
 
 // UpdateBroadcast is the resolver for the updateBroadcast field.
 func (r *mutationResolver) UpdateBroadcast(ctx context.Context, id string, input model.NewBroadcast) (*model.Broadcast, error) {
-	panic(fmt.Errorf("not implemented: UpdateBroadcast - updateBroadcast"))
+	var broadcast models.Broadcast
+	if err := config.DB.First(&broadcast, id).Error; err != nil {
+		return nil, err
+	}
+	broadcast.Name = input.Name
+	if err := config.DB.Save(&broadcast).Error; err != nil {
+		return nil, err
+	}
+	return &model.Broadcast{ID: fmt.Sprint(broadcast.ID), Name: broadcast.Name}, nil
 }
 
 // DeleteBroadcast is the resolver for the deleteBroadcast field.
 func (r *mutationResolver) DeleteBroadcast(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteBroadcast - deleteBroadcast"))
+	if err := config.DB.Delete(&models.Broadcast{}, id).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // Movies is the resolver for the movies field.
@@ -305,12 +327,24 @@ func (r *queryResolver) Genre(ctx context.Context, id string) (*model.Genre, err
 
 // Broadcasts is the resolver for the broadcasts field.
 func (r *queryResolver) Broadcasts(ctx context.Context) ([]*model.Broadcast, error) {
-	panic(fmt.Errorf("not implemented: Broadcasts - broadcasts"))
+	var broadcasts []models.Broadcast
+	if err := config.DB.Find(&broadcasts).Error; err != nil {
+		return nil, err
+	}
+	var result []*model.Broadcast
+	for _, b := range broadcasts {
+		result = append(result, &model.Broadcast{ID: fmt.Sprint(b.ID), Name: b.Name})
+	}
+	return result, nil
 }
 
 // Broadcast is the resolver for the broadcast field.
 func (r *queryResolver) Broadcast(ctx context.Context, id string) (*model.Broadcast, error) {
-	panic(fmt.Errorf("not implemented: Broadcast - broadcast"))
+	var broadcast models.Broadcast
+	if err := config.DB.First(&broadcast, id).Error; err != nil {
+		return nil, err
+	}
+	return &model.Broadcast{ID: fmt.Sprint(broadcast.ID), Name: broadcast.Name}, nil
 }
 
 // Statuses is the resolver for the statuses field.
