@@ -12,6 +12,7 @@ import (
 	"movie_api/graph/model"
 	"movie_api/models"
 	"movie_api/utils"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -216,17 +217,142 @@ func (r *mutationResolver) DeleteGenre(ctx context.Context, id string) (bool, er
 
 // CreateMovie is the resolver for the createMovie field.
 func (r *mutationResolver) CreateMovie(ctx context.Context, input model.CreateMovieInput) (*model.Movie, error) {
-	panic(fmt.Errorf("not implemented: CreateMovie - createMovie"))
+	var statuses []models.Statuses
+	if err := config.DB.Where("id_statuses IN ?", input.StatusIDs).Find(&statuses).Error; err != nil {
+		return nil, err
+	}
+
+	isComingSoon := false
+	for _, s := range statuses {
+		if strings.ToLower(s.Name) == "coming soon" {
+			isComingSoon = true
+			break
+		}
+	}
+
+	if !isComingSoon {
+		if input.Rating == nil || input.Duration == nil {
+			return nil, errors.New("rating dan duration wajib jika bukan Coming Soon")
+		}
+	}
+
+	movie := models.Movies{
+		Name:        input.Title,
+		Description: input.Description,
+		Views: func() int {
+			if input.Views != nil {
+				return int(*input.Views)
+			}
+			return 0
+		}(),
+	}
+
+	// Tambahkan jika ada nilai
+	if input.Rating != nil {
+		movie.Rating = float32(*input.Rating)
+	}
+	if input.Duration != nil {
+		movie.Duration = int(*input.Duration)
+	}
+	if input.Poster != nil {
+		movie.Poster = *input.Poster
+	}
+	if input.Views != nil && *input.Views < 0 {
+		return nil, errors.New("views tidak boleh negatif")
+	}
+
+	if err := config.DB.Create(&movie).Error; err != nil {
+		return nil, err
+	}
+
+	// Relasi
+	if len(input.GenreIDs) > 0 {
+		var genres []models.Genres
+		config.DB.Find(&genres, input.GenreIDs)
+		config.DB.Model(&movie).Association("Genres").Replace(&genres)
+	}
+	if len(input.ActorIDs) > 0 {
+		var actors []models.Actors
+		config.DB.Find(&actors, input.ActorIDs)
+		config.DB.Model(&movie).Association("Actors").Replace(&actors)
+	}
+	if len(input.BroadcastIDs) > 0 {
+		var broadcasts []models.Broadcast
+		config.DB.Find(&broadcasts, input.BroadcastIDs)
+		config.DB.Model(&movie).Association("Broadcast").Replace(&broadcasts)
+	}
+	if len(input.StatusIDs) > 0 {
+		config.DB.Model(&movie).Association("Statuses").Replace(&statuses)
+	}
+
+	return MapMovieToGraphQL(movie), nil
 }
 
 // UpdateMovie is the resolver for the updateMovie field.
 func (r *mutationResolver) UpdateMovie(ctx context.Context, id string, input model.UpdateMovieInput) (*model.Movie, error) {
-	panic(fmt.Errorf("not implemented: UpdateMovie - updateMovie"))
+	var movie models.Movies
+	if err := config.DB.
+		Preload("Genres").
+		Preload("Actors").
+		Preload("Broadcast").
+		Preload("Statuses").
+		First(&movie, id).Error; err != nil {
+		return nil, err
+	}
+
+	if input.Title != nil {
+		movie.Name = *input.Title
+	}
+	if input.Description != nil {
+		movie.Description = *input.Description
+	}
+	if input.Rating != nil {
+		movie.Rating = float32(*input.Rating)
+	}
+	if input.Duration != nil {
+		movie.Duration = int(*input.Duration)
+	}
+	if input.Poster != nil {
+		movie.Poster = *input.Poster
+	}
+	if input.Views != nil {
+		movie.Views = int(*input.Views)
+	}
+
+	if err := config.DB.Save(&movie).Error; err != nil {
+		return nil, err
+	}
+
+	if input.GenreIDs != nil {
+		var genres []models.Genres
+		config.DB.Find(&genres, input.GenreIDs)
+		config.DB.Model(&movie).Association("Genres").Replace(&genres)
+	}
+	if input.ActorIDs != nil {
+		var actors []models.Actors
+		config.DB.Find(&actors, input.ActorIDs)
+		config.DB.Model(&movie).Association("Actors").Replace(&actors)
+	}
+	if input.BroadcastIDs != nil {
+		var broadcasts []models.Broadcast
+		config.DB.Find(&broadcasts, input.BroadcastIDs)
+		config.DB.Model(&movie).Association("Broadcast").Replace(&broadcasts)
+	}
+	if input.StatusIDs != nil {
+		var statuses []models.Statuses
+		config.DB.Find(&statuses, input.StatusIDs)
+		config.DB.Model(&movie).Association("Statuses").Replace(&statuses)
+	}
+
+	return MapMovieToGraphQL(movie), nil
 }
 
 // DeleteMovie is the resolver for the deleteMovie field.
 func (r *mutationResolver) DeleteMovie(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteMovie - deleteMovie"))
+	if err := config.DB.Delete(&models.Movies{}, id).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // CreateBroadcast is the resolver for the createBroadcast field.
@@ -268,12 +394,36 @@ func (r *mutationResolver) DeleteBroadcast(ctx context.Context, id string) (bool
 
 // Movies is the resolver for the movies field.
 func (r *queryResolver) Movies(ctx context.Context) ([]*model.Movie, error) {
-	panic(fmt.Errorf("not implemented: Movies - movies"))
+	var movies []models.Movies
+	if err := config.DB.
+		Preload("Genres").
+		Preload("Actors").
+		Preload("Broadcast").
+		Preload("Statuses").
+		Find(&movies).Error; err != nil {
+		return nil, err
+	}
+
+	var result []*model.Movie
+	for _, m := range movies {
+		result = append(result, MapMovieToGraphQL(m))
+	}
+	return result, nil
 }
 
 // Movie is the resolver for the movie field.
 func (r *queryResolver) Movie(ctx context.Context, id string) (*model.Movie, error) {
-	panic(fmt.Errorf("not implemented: Movie - movie"))
+	var movie models.Movies
+	if err := config.DB.
+		Preload("Genres").
+		Preload("Actors").
+		Preload("Broadcast").
+		Preload("Statuses").
+		First(&movie, id).Error; err != nil {
+		return nil, err
+	}
+
+	return MapMovieToGraphQL(movie), nil
 }
 
 // Me is the resolver for the me field.
